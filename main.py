@@ -9,28 +9,33 @@ import threading
 
 
 class SocketServer():
+    
     def __init__(self, host, port, event):
         self.host = host
         self.port = port
         self.event = event
+        storage_dir = 'storage'
+        if not os.path.exists(storage_dir):
+            os.makedirs(storage_dir)
+
+        data_file = os.path.join(storage_dir, 'data.json')
+        if not os.path.exists(data_file):
+            with open(data_file, 'w') as file:
+                json.dump({}, file)
+
+
     
     def socket_receive(self):
-        server_socket = socket.socket()
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         server_socket.bind((self.host, self.port))
-        server_socket.listen(2)
+        # server_socket.listen(2) - works only in TCP mode
         self.event.set() # Notify the socket server is running        
         
         while True:
-            conn, address = server_socket.accept()
-            print(f'Connection from {address}')
-            while True:
-                data = conn.recv(100)
-
-                if not data:
-                    break
-                print(f'received message: {data}')
-                self.save_to_json(raw_data=data)
-            conn.close()
+            #conn, address = server_socket.accept()
+            data, address = server_socket.recvfrom(1024)
+            print(f'Received message from {address}: {data.decode()}')
+            self.save_to_json(data)
 
     def save_to_json(self, raw_data):
         storage_path = "./storage/data.json"
@@ -91,7 +96,7 @@ class HttpHandler(BaseHTTPRequestHandler):
         host = 'localhost' #socket.gethostname()
         port = 5000
 
-        client_socket = socket.socket()
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         client_socket.connect((host, port))
         client_socket.send(raw_data)
         client_socket.close()
