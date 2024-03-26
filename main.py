@@ -7,6 +7,7 @@ import json
 import socket
 import threading
 
+HOST = "0.0.0.0"
 
 class SocketServer():
     
@@ -21,7 +22,9 @@ class SocketServer():
         data_file = os.path.join(storage_dir, 'data.json')
         if not os.path.exists(data_file):
             with open(data_file, 'w') as file:
+                print('Before writing to file{data_file}')
                 json.dump({}, file)
+                print("The data is added to file")
 
 
     
@@ -93,7 +96,7 @@ class HttpHandler(BaseHTTPRequestHandler):
             self.wfile.write(file.read())
 
     def send_to_server(self, raw_data):
-        host = 'localhost' #socket.gethostname()
+        host = HOST #socket.gethostname()
         port = 5000
 
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -102,7 +105,7 @@ class HttpHandler(BaseHTTPRequestHandler):
         client_socket.close()
         
 def start_http_server(server_class=HTTPServer, handler_class=HttpHandler):
-    server_address = ('', 3000)
+    server_address = ('0.0.0.0', 3000)
     http = server_class(server_address, handler_class)
     try:
         if event:
@@ -112,7 +115,7 @@ def start_http_server(server_class=HTTPServer, handler_class=HttpHandler):
         http.server_close()
 
 def start_socket_server(event):
-    socket_server = SocketServer('localhost', 5000, event)
+    socket_server = SocketServer(HOST, 5000, event)
     socket_server.socket_receive()
 
 
