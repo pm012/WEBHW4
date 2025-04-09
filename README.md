@@ -24,7 +24,7 @@ The format of the data.json file is as follows:
     "message": "Second message"
   }
 }
-'''
+```
 Where the key of each message is the time of receipt of the message: datetime.now(). That is, each new message from the web application is appended to the storage/data.json file with the time of receipt.
 
 Use a single main.py file to create your web application.
